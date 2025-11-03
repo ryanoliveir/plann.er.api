@@ -1,22 +1,19 @@
 import type { FastifyInstance } from "fastify";
 import { ClientError } from "./errors/client-error";
 import { hasZodFastifySchemaValidationErrors } from "fastify-type-provider-zod";
-import { treeifyError, ZodError } from "zod/v4";
+import { treeifyError, ZodError, z } from "zod";
 
 type FastifyErrorHandler = FastifyInstance["errorHandler"];
+//https://zod.dev/error-formatting?id=zformaterror
 
 export const erroHandler: FastifyErrorHandler = (error, request, reply) => {
-  if (hasZodFastifySchemaValidationErrors(error)) {
-    return reply.status(400).send({
-      message: "Invalid input",
-      errors: error,
-    });
-  }
-
   if (error instanceof ZodError) {
     return reply.status(400).send({
-      message: error.message,
-      errors: treeifyError(error),
+      message: "Invalid input",
+      // errors: z.flattenError(error),
+      // errors: z.prettifyError(error),
+      // errors: z.formatError(error),
+      errors: z.flattenError(error),
     });
   }
 
